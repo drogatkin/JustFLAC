@@ -48,6 +48,17 @@ public class EntropyPartitionedRice extends EntropyCodingMethod {
         int sample = 0;
         int partitions = 1 << partitionOrder;
         int partitionSamples = partitionOrder > 0 ? header.blockSize >> partitionOrder : header.blockSize - predictorOrder;
+        if (predictorOrder == 0) {
+        	if (header.blockSize < predictorOrder) {
+        		//System.err.printf("NEED RESYNC  %d - %d%n", header.blockSize, predictorOrder);
+        		return;
+        	}
+        } else {
+        	if (partitionSamples < predictorOrder) {
+        		//System.err.printf("NEED RESYNC2  %d - %d%n", partitionSamples , predictorOrder);
+        		return;
+        	}
+        }
         contents.ensureSize(Math.max(6, partitionOrder));
         contents.parameters = new int[partitions];
 

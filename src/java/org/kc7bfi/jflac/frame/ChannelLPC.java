@@ -97,8 +97,7 @@ public class ChannelLPC extends Channel {
             	 entropyCodingMethod = new EntropyPartitionedRice2();
                 break;
             default :
-               // throw new IOException("STREAM_DECODER_UNPARSEABLE_STREAM, "+codingType);
-            	return;
+               throw new FrameDecodeException("STREAM_DECODER_UNPARSEABLE_STREAM, "+codingType);
         }
         entropyCodingMethod.order = is.readRawUInt(ENTROPY_CODING_METHOD_PARTITIONED_RICE_ORDER_LEN);
    	    entropyCodingMethod.contents = channelData.getPartitionedRiceContents();

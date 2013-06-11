@@ -64,23 +64,20 @@ public class ChannelFixed extends Channel {
         // read entropy coding method info
         int type = is.readRawUInt(ENTROPY_CODING_METHOD_TYPE_LEN);
         EntropyCodingMethod pr;
-        int bits = 0;
         switch (type) {
             case ENTROPY_CODING_METHOD_PARTITIONED_RICE :
-                bits = ENTROPY_CODING_METHOD_PARTITIONED_RICE_ORDER_LEN;
                 pr = new EntropyPartitionedRice();
                 break;
             case RESIDUAL_CODING_METHOD_PARTITIONED_RICE2 :
-                bits = ENTROPY_CODING_METHOD_PARTITIONED_RICE2_ORDER_LEN;
                 pr = new EntropyPartitionedRice2();
                 break;
             default :
                 throw new FrameDecodeException("STREAM_DECODER_UNPARSEABLE_STREAM, type:"+type);
         }
-                entropyCodingMethod = pr;
-                pr.order = is.readRawUInt(bits);
-                pr.contents = channelData.getPartitionedRiceContents();
-                pr.readResidual(is, order, pr.order, header, channelData.getResidual());
+		entropyCodingMethod = pr;
+		pr.order = is.readRawUInt(ENTROPY_CODING_METHOD_PARTITIONED_RICE_ORDER_LEN);
+		pr.contents = channelData.getPartitionedRiceContents();
+		pr.readResidual(is, order, pr.order, header, channelData.getResidual());
 
         // decode the subframe
         System.arraycopy(warmup, 0, channelData.getOutput(), 0, order);
