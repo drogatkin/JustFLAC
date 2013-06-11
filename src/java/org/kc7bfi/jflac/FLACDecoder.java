@@ -160,9 +160,10 @@ public class FLACDecoder {
         pcmProcessors.removePCMProcessor(processor);
     }
     
-    private void callPCMProcessors(Frame frame) {
+    private boolean callPCMProcessors(Frame frame) {
     	ByteData bd = decodeFrame(frame, null);
         pcmProcessors.processPCM(bd);
+        return pcmProcessors.isCanceled() == false;
     }
     
     /**
@@ -334,7 +335,8 @@ public class FLACDecoder {
                 try {
                     readFrame();
                     frameListeners.processFrame(frame);
-                    callPCMProcessors(frame);
+                    if (!callPCMProcessors(frame))
+                    	throw new EOFException();
                 } catch (FrameDecodeException e) {
                     badFrames++;
                 }
