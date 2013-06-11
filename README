@@ -1,0 +1,21 @@
+Welcome to JustFLAC
+===================
+
+What's the heck?
+----------------
+
+It isn't a fish, it is just a fork of popular
+jFLAC decoder. 
+
+Why to fork?
+------------
+
+jFLAC is out of support and seemed missed certain
+popular formats as 24 bits/192,000. The decoder has
+also few minor bugs. So the project is supposed
+to give new format extension support and also fix
+some bugs.
+
+It is already used in MediaChest and Music-Barrel giving life 
+audiophile quality formats previously supported only by Foobar and
+DeaDBeeF. By the fomers are C programs when newly supported are java.
