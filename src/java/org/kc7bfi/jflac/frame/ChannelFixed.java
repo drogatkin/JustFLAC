@@ -24,6 +24,7 @@ import java.io.IOException;
 
 import org.kc7bfi.jflac.ChannelData;
 import org.kc7bfi.jflac.FixedPredictor;
+import org.kc7bfi.jflac.FrameDecodeException;
 import org.kc7bfi.jflac.io.BitInputStream;
 
 /**
@@ -47,8 +48,9 @@ public class ChannelFixed extends Channel {
      * @param wastedBits    The bits waisted in the frame
      * @param order         The predicate order
      * @throws IOException  Thrown if error reading from the InputBitStream
+     * @throws FrameDecodeException 
      */
-    public ChannelFixed(BitInputStream is, Header header, ChannelData channelData, int bps, int wastedBits, int order) throws IOException {
+    public ChannelFixed(BitInputStream is, Header header, ChannelData channelData, int bps, int wastedBits, int order) throws IOException, FrameDecodeException {
         super(header, wastedBits);
         
         this.residual = channelData.getResidual();
@@ -61,22 +63,22 @@ public class ChannelFixed extends Channel {
 
         // read entropy coding method info
         int type = is.readRawUInt(ENTROPY_CODING_METHOD_TYPE_LEN);
-        EntropyPartitionedRice pr;
+        EntropyCodingMethod pr;
         int bits = 0;
         switch (type) {
             case ENTROPY_CODING_METHOD_PARTITIONED_RICE :
                 bits = ENTROPY_CODING_METHOD_PARTITIONED_RICE_ORDER_LEN;
+                pr = new EntropyPartitionedRice();
                 break;
             case RESIDUAL_CODING_METHOD_PARTITIONED_RICE2 :
                 bits = ENTROPY_CODING_METHOD_PARTITIONED_RICE2_ORDER_LEN;
+                pr = new EntropyPartitionedRice2();
                 break;
             default :
-                throw new IOException("STREAM_DECODER_UNPARSEABLE_STREAM, type:"+type);
+                throw new FrameDecodeException("STREAM_DECODER_UNPARSEABLE_STREAM, type:"+type);
         }
-                int u32 = is.readRawUInt(bits);
-                pr = new EntropyPartitionedRice();
                 entropyCodingMethod = pr;
-                pr.order = u32;
+                pr.order = is.readRawUInt(bits);
                 pr.contents = channelData.getPartitionedRiceContents();
                 pr.readResidual(is, order, pr.order, header, channelData.getResidual());
 
