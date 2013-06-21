@@ -44,7 +44,7 @@ public class EntropyPartitionedRice2 extends EntropyCodingMethod {
         	}
         }
         contents.ensureSize(Math.max(6, partitionOrder));
-        contents.parameters = new int[partitions];
+        //contents.parameters = new int[partitions];
 
         for (int partition = 0; partition < partitions; partition++) {
             int riceParameter = is.readRawUInt(ENTROPY_CODING_METHOD_PARTITIONED_RICE2_PARAMETER_LEN);

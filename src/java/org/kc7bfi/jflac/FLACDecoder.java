@@ -59,11 +59,10 @@ public class FLACDecoder {
     private ChannelData[] channelData = new ChannelData[Constants.MAX_CHANNELS];
     private int outputCapacity = 0;
     private int outputChannels = 0;
-    private int lastFrameNumber;
     private long samplesDecoded = 0;
     private StreamInfo streamInfo;
     private Frame frame = new Frame();
-    private byte[] headerWarmup = new byte[2]; // contains the sync code and reserved bits
+    static private byte[] headerWarmup = new byte[2]; // contains the sync code and reserved bits
     //private int state;
     private int channels;
     private int channelAssignment;
@@ -99,7 +98,6 @@ public class FLACDecoder {
         this.inputStream = inputStream;
         this.bitStream = new BitInputStream(inputStream);
         //state = DECODER_SEARCH_FOR_METADATA;
-        lastFrameNumber = 0;
         samplesDecoded = 0;
         //state = DECODER_SEARCH_FOR_METADATA;
     }

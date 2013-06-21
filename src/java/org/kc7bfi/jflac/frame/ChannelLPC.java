@@ -41,8 +41,8 @@ public class ChannelLPC extends Channel {
     private int order; // The FIR order.
     private int qlpCoeffPrecision; // Quantized FIR filter coefficient precision in bits.
     private int quantizationLevel; // The qlp coeff shift needed.
-    private int[] qlpCoeff = new int[MAX_LPC_ORDER]; // FIR filter coefficients.
-    private int[] warmup = new int[MAX_LPC_ORDER]; // Warmup samples to prime the predictor, length == order.
+    static private int[] qlpCoeff = new int[MAX_LPC_ORDER]; // FIR filter coefficients.
+    static private int[] warmup = new int[MAX_LPC_ORDER]; // Warmup samples to prime the predictor, length == order.
     private int[] residual; // The residual signal, length == (blocksize minus order) samples.
 
     /**
