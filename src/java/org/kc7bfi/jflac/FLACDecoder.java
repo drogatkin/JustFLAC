@@ -119,11 +119,19 @@ public class FLACDecoder {
     }
     
     /**
-     * Return the input but stream.
+     * Return the input bit stream.
      * @return  The bit stream
      */
     public BitInputStream getBitInputStream() {
         return bitStream;
+    }
+    
+    /**
+     * Return the input stream.
+     * @return  The input stream
+     */
+    public InputStream getInputStream() {
+        return inputStream;
     }
     
     /**
