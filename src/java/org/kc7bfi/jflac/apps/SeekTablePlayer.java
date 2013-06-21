@@ -50,8 +50,7 @@ public class SeekTablePlayer implements PCMProcessor, FrameListener {
     private DataLine.Info info;
     private SourceDataLine line;
     
-    private StreamInfo streamInfo = null;
-    private SeekTable seekTable = null;
+    private SeekTable seekTable;
     
     /**
      * Decode and play an input FLAC file.
@@ -93,9 +92,8 @@ public class SeekTablePlayer implements PCMProcessor, FrameListener {
      * @see org.kc7bfi.jflac.PCMProcessor#processStreamInfo(org.kc7bfi.jflac.metadata.StreamInfo)
      */
     public void processStreamInfo(StreamInfo streamInfo) {
-        this.streamInfo = streamInfo;
         try {
-            fmt = streamInfo.getAudioFormat();
+            fmt = Player.getAudioFormat(streamInfo);
             info = new DataLine.Info(SourceDataLine.class, fmt, AudioSystem.NOT_SPECIFIED);
             line = (SourceDataLine) AudioSystem.getLine(info);
             line.open(fmt, AudioSystem.NOT_SPECIFIED);

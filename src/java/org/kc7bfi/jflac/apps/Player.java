@@ -87,7 +87,7 @@ public class Player implements PCMProcessor {
      */
     public void processStreamInfo(StreamInfo streamInfo) {
         try {
-            fmt = streamInfo.getAudioFormat();
+            fmt = getAudioFormat(streamInfo);
             info = new DataLine.Info(SourceDataLine.class, fmt, AudioSystem.NOT_SPECIFIED);
             line = (SourceDataLine) AudioSystem.getLine(info);
 
@@ -119,7 +119,12 @@ public class Player implements PCMProcessor {
 		listeners.removeElement(listener);
 	}
 
-
+	/**
+     * @return the Java Sound AudioFormat for this stream info.
+     */
+    public static AudioFormat getAudioFormat(StreamInfo streamInfo) {
+        return new AudioFormat(streamInfo.getSampleRate(), streamInfo.getBitsPerSample(), streamInfo.getChannels(), (streamInfo.getBitsPerSample() <= 8) ? false : true, false);
+    }
     /**
      * The main routine.
      * <p>args[0] is the input file name
