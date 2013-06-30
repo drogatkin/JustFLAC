@@ -73,7 +73,7 @@ public class CueSheet extends Metadata {
     }
 
     /**
-     * Verifys the Cue Sheet.
+     * Verifies the Cue Sheet.
      * @param checkCdDaSubset   True for check CD subset
      * @throws Violation        Thrown if invalid Cue Sheet
      */
