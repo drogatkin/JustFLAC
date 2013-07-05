@@ -106,7 +106,39 @@ public class Picture extends Metadata {
         is.readByteBlockAlignedNoCRC(null, length);
 
     }
-    /**
+    
+    public int getPictureType() {
+		return pictureType;
+	}
+
+
+	public String getMimeString() {
+		return mimeString;
+	}
+
+
+	public String getDescString() {
+		return descString;
+	}
+
+
+	public int getPicPixelWidth() {
+		return picPixelWidth;
+	}
+
+
+
+	public int getPicPixelHeight() {
+		return picPixelHeight;
+	}
+
+
+	public byte[] getImage() {
+		return image;
+	}
+
+
+	/**
      * Convert the class to a string representation.
      * @return  A string representation of the Picture metadata
      */
