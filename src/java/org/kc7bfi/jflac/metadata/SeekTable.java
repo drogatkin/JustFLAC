@@ -102,6 +102,17 @@ public class SeekTable extends Metadata {
         return points[idx];
     }
     
+    public SeekPoint seekSeekPoint(long sampleNumber) {
+    	for(int idx=0; idx<points.length; idx++) {
+    		if(points[idx].sampleNumber > sampleNumber) {
+    			if (idx > 0)
+    				return points[idx-1];
+    			return points[idx];
+    		}
+    	}
+    	return null;
+    }
+    
     /**
      * Return the number of seek points.
      * @return the number of seek points
