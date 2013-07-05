@@ -866,6 +866,11 @@ public class FLACDecoder {
     public long getSamplesDecoded() {
         return samplesDecoded;
     }
+    
+    public void setSamplesDecoded(long samples) {
+        samplesDecoded = samples;
+    }
+    
     /**
      * @return Returns the number of bad frames decoded.
      */
