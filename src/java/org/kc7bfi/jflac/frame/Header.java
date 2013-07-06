@@ -94,6 +94,7 @@ public class Header {
         // read in the raw header as bytes so we can CRC it, and parse it on the way
         for (int i = 0; i < 2; i++) {
             if (is.peekRawUInt(8) == 0xff) { // MAGIC NUMBER for the first 8 frame sync bits
+            	is.readRawUInt(8); // move ff
                 throw new BadHeaderException("Found sync byte");
             }
             rawHeader.append((byte) is.readRawUInt(8));

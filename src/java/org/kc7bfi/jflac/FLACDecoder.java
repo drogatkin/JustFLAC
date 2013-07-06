@@ -506,6 +506,7 @@ public class FLACDecoder {
                     readFrame();
                     return frame;
                 } catch (FrameDecodeException e) {
+                	//e.printStackTrace();
                     badFrames++;
                 }
                 //break;
@@ -692,7 +693,6 @@ public class FLACDecoder {
      * @throws FrameDecodeException On frame decoding error
      */
     public void readFrame() throws IOException, FrameDecodeException {
-        boolean gotAFrame = false;
         int channel;
         int i;
         int mid, side, left, right;
@@ -778,8 +778,6 @@ public class FLACDecoder {
             default :
                 break;
             }
-            
-            gotAFrame = true;
         } else {
             // Bad frame, emit error and zero the output signal
             frameListeners.processError("CRC Error: " + Integer.toHexString((frameCRC & 0xffff)) + " vs " + Integer.toHexString((frame.getCRC() & 0xffff)));
