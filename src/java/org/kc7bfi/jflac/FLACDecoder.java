@@ -507,6 +507,7 @@ public class FLACDecoder {
                     return frame;
                 } catch (FrameDecodeException e) {
                 	//e.printStackTrace();
+                	//System.err.print("Error "+e+" at sample "+samplesDecoded+" of "+streamInfo.getTotalSamples());
                     badFrames++;
                 }
                 //break;
