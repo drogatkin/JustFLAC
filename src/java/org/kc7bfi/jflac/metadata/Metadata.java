@@ -60,7 +60,7 @@ public abstract class Metadata {
     protected boolean isLast;
     
     /**
-     * Constructir.
+     * Constructor.
      * @param isLast    True if last Metadata block
      */
     public Metadata(boolean isLast) {
