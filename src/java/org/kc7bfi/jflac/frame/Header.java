@@ -83,7 +83,7 @@ public class Header {
         rawHeader.append(headerWarmup[1]);
         
         // check to make sure that the reserved bits are 0
-        if ((rawHeader.getData(1) & 0x03) != 0) { // MAGIC NUMBER
+        if ((rawHeader.getData(1) & 0x02) != 0) { // MAGIC NUMBER
             throw new BadHeaderException("Bad Magic Number: " + (rawHeader.getData(1) & 0xff));
         }
         

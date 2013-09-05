@@ -344,6 +344,8 @@ public class FLACDecoder {
                     if (!callPCMProcessors(frame))
                     	throw new EOFException();
                 } catch (FrameDecodeException e) {
+                	if (__DEBUG)
+                		e.printStackTrace();
                     badFrames++;
                 }
                 //    break;
@@ -712,7 +714,7 @@ public class FLACDecoder {
             frame.header = new Header(bitStream, headerWarmup, streamInfo);
         } catch (BadHeaderException e) {
             frameListeners.processError("Found bad header: " + e);
-            throw new FrameDecodeException("Bad Frame Header: " + e);
+            throw new FrameDecodeException("Bad Frame Header: " + e, e);
         }
         //if (state == DECODER_SEARCH_FOR_FRAME_SYNC) return false;
         allocateOutput(frame.header.blockSize, frame.header.channels);
@@ -884,4 +886,6 @@ public class FLACDecoder {
     public boolean isEOF() {
         return eof;
     }
+    
+    static final boolean __DEBUG = false;
 }

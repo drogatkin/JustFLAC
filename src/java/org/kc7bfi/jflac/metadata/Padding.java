@@ -49,6 +49,6 @@ public class Padding extends Metadata {
      * @see java.lang.Object#toString()
      */
     public String toString() {
-        return "Padding (Length=" + length + ")";
+        return "Padding (Length=" + length + ") last ="+isLast;
     }
 }
