@@ -29,8 +29,7 @@ import org.kc7bfi.jflac.io.BitInputStream;
  * @author kc7bfi
  */
 public class Padding extends Metadata {
-    private int length;
-
+   
     /**
      * The constructor.
      * @param is                The InputBitStream
@@ -39,8 +38,7 @@ public class Padding extends Metadata {
      * @throws IOException      Thrown if error reading from InputBitStream
      */
     public Padding(BitInputStream is, int length, boolean isLast) throws IOException {
-        super(isLast);
-        this.length = length;
+        super(isLast, length);
         is.readByteBlockAlignedNoCRC(null, length);
     }
     

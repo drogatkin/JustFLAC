@@ -60,7 +60,7 @@ public class StreamInfo extends Metadata {
      * @throws IOException      Thrown if error reading from InputBitStream
      */
     public StreamInfo(BitInputStream is, int length, boolean isLast) throws IOException {
-        super(isLast);
+        super(isLast, length);
         int usedBits = 0;
 
         minBlockSize = is.readRawUInt(STREAMINFO_MIN_BLOCK_SIZE_LEN);
@@ -137,7 +137,7 @@ public class StreamInfo extends Metadata {
     }
     
     /**
-     * Check for compatiable StreamInfo.
+     * Check for compatible StreamInfo.
      * Checks if sampleRate, channels, and bitsPerSample are equal
      * @param info  The StreamInfo block to check
      * @return  True if this and info are compatable

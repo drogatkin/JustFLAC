@@ -78,7 +78,7 @@ public class Picture extends Metadata {
      * @throws IOException      Thrown if error reading from InputBitStream
      */
     public Picture(BitInputStream is, int length, boolean isLast) throws IOException {
-        super(isLast);
+        super(isLast, length);
         int usedBits = 0;
         byte[] data;
         int t = is.readRawUInt(32);
