@@ -247,11 +247,11 @@ public class Header {
                 throw new BadHeaderException("Bad Sample Number");
             }
         } else {
-            int lastFrameNumber = is.readUTF8Int(rawHeader);
-            if (lastFrameNumber == 0xffffffff) { // i.e. non-UTF8 code...
+        	frameNumber = is.readUTF8Int(rawHeader);
+            if (frameNumber == 0xffffffff) { // i.e. non-UTF8 code...
                 throw new BadHeaderException("Bad Last Frame");
             }
-            sampleNumber = (long) streamInfo.getMinBlockSize() * (long) lastFrameNumber;
+            sampleNumber = (long) streamInfo.getMinBlockSize() * (long) frameNumber;
         }
         
         if (blocksizeHint != 0) {

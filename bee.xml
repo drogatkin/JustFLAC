@@ -264,6 +264,15 @@
      </operator>
   </expression>
 
+  <target name="test" dir="PROJECT_HOME">
+    <echo>Running...</echo>
+    <dependency target="jar"/>
+    <dependency value="true"/>
+    <task name="main" code="org.kc7bfi.jflac.apps.Tester" path="run class path">
+       <parameter variable="~#args#~"/>
+    </task>
+  </target>  
+
   <target name="run" dir="PROJECT_HOME">
     <echo>Running...</echo>
     <dependency target="jar"/>
