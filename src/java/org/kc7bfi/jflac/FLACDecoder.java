@@ -490,7 +490,8 @@ public class FLACDecoder {
 		bitStream = new BitInputStream(rf);
 		Frame savedFrame = frame;
 		frame = new Frame();
-		boolean forward = true;;
+		boolean forward = true;
+		
 		while (true) {
 			/* Clip the position to the bounds, lower bound takes precedence. */
 			if (pos >= upper_bound) {
@@ -540,7 +541,7 @@ public class FLACDecoder {
 
 			/* Break out if seeking somehow got caught in a loop. */
 			if (i >= 30) {
-				System.err.printf("Nothing found after 30 iter ps %d%n", pos);
+				System.err.printf("Nothing found after 30 iters ps %d%n", pos);
 				restoreState(savedPos, savedState, savedFrame);
 				return null;
 			}
@@ -554,10 +555,11 @@ public class FLACDecoder {
 				System.err.printf("Found sample %d with extra %d%n", this_frame_sample, sample_skip);
 				break;
 			} else if (target_sample < this_frame_sample) {
-				if (this_frame_sample - target_sample <= min_blocksize * 10) {
+				if (this_frame_sample - target_sample <= this_block_size * 10) {
 					/* Target is no more than 10 frames back,
 					 * seek backwards a frame at a time.
 					 */
+					System.err.printf("Look back few frames %d%n", approx_bytes_per_frame);
 					if (this_frame_sample == last_frame_sample && pos < last_pos) {
 						/* Our last move backwards wasn't big enough, double it. */
 						pos -= (last_pos - pos);
@@ -574,9 +576,15 @@ public class FLACDecoder {
 							* min_framesize;
 					long max_bytes_to_frame = ((this_frame_sample - target_sample + max_blocksize - 1) / max_blocksize)
 							* max_framesize;
+					if (last_frame_sample > 0 && last_jump >0) {
+						long delta = this_frame_sample - last_frame_sample;
+						this_jump = (int) (last_jump  * (this_frame_sample - target_sample) / delta);
+						if (this_jump < 0)
+							this_jump = -this_jump;
+					} else
 					this_jump = (int) ((min_bytes_to_frame + max_bytes_to_frame) / 2);
-					if (forward && last_jump > 0)
-						this_jump /=  3;
+					//if (forward && last_jump > 0)
+					//	this_jump /=  3;
 					//if (last_jump > 0 && this_jump >= last_jump)
 					//	this_jump = last_jump / 2;//- approx_bytes_per_frame;
 					pos = rf.getPosition() - this_jump;
@@ -614,9 +622,15 @@ public class FLACDecoder {
 							* min_framesize;
 					long max_bytes_to_frame = ((target_sample - this_frame_sample + min_blocksize - 1) / min_blocksize)
 							* max_framesize;
+					if (last_frame_sample > 0 && last_jump >0) {
+						long delta = this_frame_sample - last_frame_sample;
+						this_jump = (int) (last_jump * (this_frame_sample - target_sample)  / delta );
+						if (this_jump < 0)
+							this_jump = -this_jump;
+					} else
 					this_jump = (int) ((min_bytes_to_frame + max_bytes_to_frame) / 2);
-					if (last_jump > 0 && !forward)
-						this_jump /= 2;
+					//if (last_jump > 0 && !forward)
+						//this_jump /= 2;
 					//if (last_jump > 0 && this_jump >= last_jump)
 						//this_jump = last_jump /2;// - approx_bytes_per_frame;
 					pos = rf.getPosition() + this_jump;
