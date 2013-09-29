@@ -413,10 +413,11 @@ public class FLACDecoder {
         }
     }
     
+    private final static boolean __SEEK_DEBUG = false;
     /** Seeks for sample and provide seek data
      * 
      * @param sampleOffset
-     * @return
+     * @return SeekPoint of best match
      * @throws IOException 
      */
 	public SeekPoint seek(long target_sample) throws IOException {
@@ -433,8 +434,7 @@ public class FLACDecoder {
 		int max_framesize = streamInfo.getMaxFrameSize();
 		int channels = streamInfo.getChannels();
 		int bps = streamInfo.getBitsPerSample();
-		System.err.printf("Seek in ts:%d, mib:%d, mab:%d, mif: %d, maf:%d %n",
-				total_samples, min_blocksize, max_blocksize, min_framesize, max_framesize);
+
 		int approx_bytes_per_frame = 0;
 		/* We are just guessing here, but we want to guess high, not low. */
 		if (max_framesize > 0)
@@ -444,8 +444,11 @@ public class FLACDecoder {
 			approx_bytes_per_frame = min_blocksize * channels * bps / 8 + 64;
 		else
 			approx_bytes_per_frame = 4608 * channels * bps / 8 + 64;
+		if (__SEEK_DEBUG)
+			System.err.printf("Seek in ts:%d, mib:%d, mab:%d, mif: %d, maf:%d bpf: %d%n", total_samples, min_blocksize,
+					max_blocksize, min_framesize, max_framesize, approx_bytes_per_frame);
 		if (min_blocksize == 0)
-			min_blocksize = (max_blocksize - min_blocksize) / 4 ;
+			min_blocksize = max_blocksize / 2;
 		if (min_framesize == 0)
 			min_framesize = max_framesize / 2;
 		/* Set an upper and lower bound on where in the stream we will search. */
@@ -472,7 +475,7 @@ public class FLACDecoder {
 			 */
 			pos = first_frame_offset + ((target_sample * (stream_length - first_frame_offset)) / total_samples)
 					- approx_bytes_per_frame;
-		} 
+		}
 		/* If there's no seek table and total_samples is unknown, we
 		 * don't even bother trying to figure out a target, we just use
 		 * our current position.
@@ -490,8 +493,7 @@ public class FLACDecoder {
 		bitStream = new BitInputStream(rf);
 		Frame savedFrame = frame;
 		frame = new Frame();
-		boolean forward = true;
-		
+
 		while (true) {
 			/* Clip the position to the bounds, lower bound takes precedence. */
 			if (pos >= upper_bound) {
@@ -505,11 +507,8 @@ public class FLACDecoder {
 
 			if (needs_seek) {
 				bitStream.reset();
-				System.err.printf("Seek %d%n", pos);
 				rf.seek(pos);
-
-				// bit_buffer = ci->request_buffer(&buff_size, MAX_FRAMESIZE);
-				// init_get_bits(&fc->gb, bit_buffer, buff_size*8);
+				needs_seek = false;
 				i++;
 			}
 
@@ -530,8 +529,8 @@ public class FLACDecoder {
 					got_a_frame = true;
 					break;
 				} catch (Exception e) {
-					System.err.printf("iter %d (%s%n", unparseable_count, e);
-//e.printStackTrace();
+					if (__SEEK_DEBUG)
+						System.err.printf("iter %d (%s%n", unparseable_count, e);
 				}
 			}
 			if (!got_a_frame) {
@@ -541,25 +540,26 @@ public class FLACDecoder {
 
 			/* Break out if seeking somehow got caught in a loop. */
 			if (i >= 30) {
-				System.err.printf("Nothing found after 30 iters ps %d%n", pos);
-				restoreState(savedPos, savedState, savedFrame);
-				return null;
+				if (__SEEK_DEBUG)
+					System.err.printf("Nothing found after 30 iters ps %d%n", pos);
+				//restoreState(savedPos, savedState, savedFrame);
+				//return null;
+				break;
 			}
 			this_frame_sample = frame.header.sampleNumber;
 			this_block_size = frame.header.blockSize;
-			System.err.printf("Found %d when asked %d s %d, ht:%d%n", this_frame_sample, target_sample, this_block_size, frame.header.frameNumber);
 
 			if (target_sample >= this_frame_sample && target_sample < this_frame_sample + this_block_size) {
 				/* Found the frame containing the target sample. */
 				sample_skip = (int) (target_sample - this_frame_sample);
-				System.err.printf("Found sample %d with extra %d%n", this_frame_sample, sample_skip);
 				break;
 			} else if (target_sample < this_frame_sample) {
 				if (this_frame_sample - target_sample <= this_block_size * 10) {
 					/* Target is no more than 10 frames back,
 					 * seek backwards a frame at a time.
 					 */
-					System.err.printf("Look back few frames %d%n", approx_bytes_per_frame);
+					if (__SEEK_DEBUG)
+						System.err.printf("Look back few frames %d to %d%n", approx_bytes_per_frame, target_sample);
 					if (this_frame_sample == last_frame_sample && pos < last_pos) {
 						/* Our last move backwards wasn't big enough, double it. */
 						pos -= (last_pos - pos);
@@ -576,75 +576,75 @@ public class FLACDecoder {
 							* min_framesize;
 					long max_bytes_to_frame = ((this_frame_sample - target_sample + max_blocksize - 1) / max_blocksize)
 							* max_framesize;
-					if (last_frame_sample > 0 && last_jump >0) {
-						long delta = this_frame_sample - last_frame_sample;
-						this_jump = (int) (last_jump  * (this_frame_sample - target_sample) / delta);
+					long delta = this_frame_sample - last_frame_sample;
+					if (last_frame_sample > 0 && last_jump > 0 && delta != 0) {
+						this_jump = (int) (last_jump * (this_frame_sample - target_sample) / delta);
 						if (this_jump < 0)
 							this_jump = -this_jump;
-					} else
-					this_jump = (int) ((min_bytes_to_frame + max_bytes_to_frame) / 2);
-					//if (forward && last_jump > 0)
-					//	this_jump /=  3;
-					//if (last_jump > 0 && this_jump >= last_jump)
-					//	this_jump = last_jump / 2;//- approx_bytes_per_frame;
+					} else if (delta == 0)
+						this_jump = last_jump + last_jump / 2;
+					else
+						this_jump = (int) ((min_bytes_to_frame + max_bytes_to_frame) / 2);
+
+					if (last_jump > 0 && this_jump >= last_jump)
+						this_jump = last_jump - approx_bytes_per_frame;
 					pos = rf.getPosition() - this_jump;
 					last_jump = this_jump;
 				}
-				System.err.printf("Jump backward samples %d for %d%n", this_frame_sample - target_sample, this_jump);
-				forward = false;
+				if (__SEEK_DEBUG)
+					System.err.printf("Jump backward samples %d for %d to %d%n", this_frame_sample - target_sample,
+							this_jump, target_sample);
 				needs_seek = true;
 			} else if (target_sample > this_frame_sample) {
 				last_pos = pos;
 				if (target_sample - this_frame_sample <= min_blocksize * 10) {
-					System.err.printf("Keep reading for %d%n", min_blocksize * 10);
+					if (__SEEK_DEBUG)
+						System.err.printf("Keep reading for %d%n", min_blocksize * 10);
 					/* Target is no more than 10 frames ahead,
 					 * seek forwards a frame at a time.
 					 */
-					
+
 					pos = rf.getPosition();
-					//pos = ci->curpos +  fc->framesize;
 					//needs_seek = true;
 					// just keep reading
 					/* If we haven't hit the target frame yet and our position
 					 * hasn't changed, it means we're at the end of the stream
 					 * and the seek target does not exist.
 					 */
-					if (last_pos == pos) {
-						restoreState(savedPos, savedState, savedFrame);
-						return null;
-					}
 				} else {
 					/* Target may be more than 10 frames ahead,
 					 * calculated new seek position.
 					 */
-					
+
 					long min_bytes_to_frame = ((target_sample - this_frame_sample + max_blocksize - 1) / max_blocksize)
 							* min_framesize;
 					long max_bytes_to_frame = ((target_sample - this_frame_sample + min_blocksize - 1) / min_blocksize)
 							* max_framesize;
-					if (last_frame_sample > 0 && last_jump >0) {
-						long delta = this_frame_sample - last_frame_sample;
-						this_jump = (int) (last_jump * (this_frame_sample - target_sample)  / delta );
+					long delta = this_frame_sample - last_frame_sample;
+					//System.err.printf("del %d, thi %d, las %d lasj %d%n", delta, this_frame_sample,
+					//	last_frame_sample, last_jump);
+					if (last_frame_sample > 0 && last_jump > 0 && delta != 0) {
+						this_jump = (int) (last_jump * (this_frame_sample - target_sample) / delta);
 						if (this_jump < 0)
 							this_jump = -this_jump;
 					} else
-					this_jump = (int) ((min_bytes_to_frame + max_bytes_to_frame) / 2);
-					//if (last_jump > 0 && !forward)
-						//this_jump /= 2;
-					//if (last_jump > 0 && this_jump >= last_jump)
-						//this_jump = last_jump /2;// - approx_bytes_per_frame;
+						this_jump = (int) ((min_bytes_to_frame + max_bytes_to_frame) / 2);
+
+					if (last_jump > 0 && this_jump >= last_jump)
+						this_jump = last_jump - approx_bytes_per_frame;
 					pos = rf.getPosition() + this_jump;
-					System.err.printf("Need a jump forward samples  %d for %d%n" , target_sample - this_frame_sample, this_jump);
+					if (__SEEK_DEBUG)
+						System.err.printf("Need a jump forward samples  %d for %d to %d%n", target_sample
+							- this_frame_sample, this_jump, target_sample);
 					last_jump = this_jump;
 					needs_seek = true;
 				}
-				forward = true;
 			}
-
 			last_frame_sample = this_frame_sample;
 		}
-
-		return new SeekPoint(target_sample-sample_skip, last_pos, sample_skip);
+		if (__SEEK_DEBUG)
+			System.err.printf("Completed in %d%n", i);
+		return new SeekPoint(target_sample - sample_skip, last_pos, sample_skip);
 	}
     
     private void restoreState(long savedPos, BitInputStream savedState, Frame savedFrame) {

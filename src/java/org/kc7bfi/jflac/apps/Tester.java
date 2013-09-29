@@ -66,7 +66,8 @@ public class Tester implements FrameListener {
         System.out.println("Seeking to "+pos+" sample");
         SeekPoint sp = decoder.seek(pos);
         System.out.println("Found point "+sp);
-        decoder.decodeFrames();
+        if (sp != null)
+        	decoder.decodeFrames();
         System.out.println(errors + " errors found!");
         is.close();
     }
