@@ -522,7 +522,7 @@ public class FLACDecoder {
 			 * bailing out.
 			 */
 			boolean got_a_frame = false;
-			for (int unparseable_count = 0; unparseable_count < 10; unparseable_count++) {
+			for (int unparseable_count = 0; unparseable_count < 20; unparseable_count++) {
 				try {
 					findFrameSync();
 					readFrame();
