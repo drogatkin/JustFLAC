@@ -23,6 +23,7 @@ package org.kc7bfi.jflac;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
 import java.util.Vector;
 
 import org.kc7bfi.jflac.frame.BadHeaderException;
@@ -57,9 +58,9 @@ public class FLACDecoder {
     
     private BitInputStream bitStream;
     private ChannelData[] channelData = new ChannelData[Constants.MAX_CHANNELS];
-    private int outputCapacity = 0;
-    private int outputChannels = 0;
-    private long samplesDecoded = 0;
+    private int outputCapacity;
+    private int outputChannels;
+    private long samplesDecoded;
     private StreamInfo streamInfo;
     private Frame frame = new Frame();
     static private byte[] headerWarmup = new byte[2]; // contains the sync code and reserved bits
@@ -809,9 +810,7 @@ public class FLACDecoder {
     private void allocateOutput(int size, int channels) {
         if (size <= outputCapacity && channels <= outputChannels) return;
         
-        for (int i = 0; i < Constants.MAX_CHANNELS; i++) {
-            channelData[i] = null;
-        }
+        Arrays.fill(channelData, null);
         
         for (int i = 0; i < channels; i++) {
             channelData[i] = new ChannelData(size);
