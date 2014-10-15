@@ -63,7 +63,7 @@ public class FLACDecoder {
     private long samplesDecoded;
     private StreamInfo streamInfo;
     private Frame frame = new Frame();
-    static private byte[] headerWarmup = new byte[2]; // contains the sync code and reserved bits
+    private byte[] headerWarmup = new byte[2]; // contains the sync code and reserved bits
     //private int state;
     private int channels;
     private int channelAssignment;
