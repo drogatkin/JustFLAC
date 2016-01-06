@@ -90,21 +90,20 @@ public class RandomFileInputStream extends InputStream {
      * @see java.io.InputStream#markSupported()
      */
     public boolean markSupported() {
-        return true;
+        return false;
     }
     
     /**
      * @see java.io.InputStream#mark(int)
      */
-    public synchronized void mark(int arg0) {
-        /** TODO */
-        System.out.println("RandomFileInputStream: mark");
+    public synchronized void mark(int pos) {
+    	 throw new UnsupportedOperationException("mark");
     }
     
     /**
      * Skip bytes in the input file.
      * @param bytes The number of bytes to skip
-     * @return the number of bytes skiped
+     * @return the number of bytes skipped
      * @throws IOException on IO error
      * @see java.io.InputStream#skip(long)
      */
