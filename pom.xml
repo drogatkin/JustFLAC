@@ -5,13 +5,17 @@
   <version>0.0.1-SNAPSHOT</version>
   <build>
     <sourceDirectory>src/java</sourceDirectory>
+    <resources>
+      <resource>
+        <directory>src/resources</directory>
+      </resource>
+    </resources>
     <plugins>
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.5.1</version>
         <configuration>
-          <source/>
-          <target/>
+          <source>1.6</source>
+          <target>1.6</target>
         </configuration>
       </plugin>
     </plugins>
