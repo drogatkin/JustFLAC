@@ -233,4 +233,10 @@ public class StreamInfo extends Metadata {
     public int getChannels() {
         return channels;
     }
-}
+
+    /**
+     * @return Returns the binary MD5 embedded in the StreamInfo.
+     */
+    public byte[] getMD5sum() {
+        return md5sum;
+    }    }
