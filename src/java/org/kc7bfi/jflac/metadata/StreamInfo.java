@@ -239,4 +239,5 @@ public class StreamInfo extends Metadata {
      */
     public byte[] getMD5sum() {
         return md5sum;
-    }    }
+    }    
+}
