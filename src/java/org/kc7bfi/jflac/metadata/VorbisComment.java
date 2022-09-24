@@ -21,6 +21,8 @@ package org.kc7bfi.jflac.metadata;
  */
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.kc7bfi.jflac.io.BitInputStream;
 
@@ -86,5 +88,19 @@ public class VorbisComment extends Metadata {
         }
         return (String [])sbuff.toArray(new String[0]);
         //return null;
+    }
+    
+    /**
+     * Converts this instance to name value pairs
+     */
+    public Map<String, Object> toMap() {
+        Map<String, Object> props = new HashMap<String, Object>(comments.length);
+        for (VorbisString comment : comments) {
+            String[] split = comment.toString().split("=");
+            if(split.length == 2) {
+                props.put(split[0].toLowerCase(), split[1]);
+            }
+        }
+        return props;
     }
 }

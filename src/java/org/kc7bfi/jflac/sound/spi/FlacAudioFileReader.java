@@ -28,6 +28,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.SequenceInputStream;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.sound.sampled.AudioFileFormat;
 import javax.sound.sampled.AudioFormat;
@@ -40,7 +42,9 @@ import org.kc7bfi.jflac.Constants;
 import org.kc7bfi.jflac.FLACDecoder;
 import org.kc7bfi.jflac.io.BitInputStream;
 import org.kc7bfi.jflac.io.BitOutputStream;
+import org.kc7bfi.jflac.metadata.Metadata;
 import org.kc7bfi.jflac.metadata.StreamInfo;
+import org.kc7bfi.jflac.metadata.VorbisComment;
 
 /**
  * Provider for Flac audio file reading services. This implementation can parse
@@ -75,7 +79,7 @@ public class FlacAudioFileReader extends AudioFileReader {
         InputStream inputStream = null;
         try {
             inputStream = new FileInputStream(file);
-            return getAudioFileFormat(inputStream, (int) file.length());
+            return includeMetadata(getAudioFileFormat(inputStream, (int) file.length()));
         } finally {
             inputStream.close();
         }
@@ -119,7 +123,7 @@ public class FlacAudioFileReader extends AudioFileReader {
      *                if an I/O exception occurs.
      */
     public AudioFileFormat getAudioFileFormat(InputStream stream) throws UnsupportedAudioFileException, IOException {
-        return getAudioFileFormat(stream, AudioSystem.NOT_SPECIFIED);
+        return includeMetadata(getAudioFileFormat(stream, AudioSystem.NOT_SPECIFIED));
     }
 
     /**
@@ -383,5 +387,26 @@ public class FlacAudioFileReader extends AudioFileReader {
         //return new AudioInputStream(sequenceInputStream, audioFileFormat
         //        .getFormat(), audioFileFormat.getFrameLength());
         return new AudioInputStream(sequenceInputStream, audioFileFormat.getFormat(), audioFileFormat.getFrameLength());
+    }
+    
+    /**
+     * Reads the metadata of the currently processed stream and enriches the format object with it.
+     * Note that reading metadata consumes part of the stream, so it should not be used directly 
+     * for reading audio data.
+     * @param format
+     * @return Enriched format
+     * @throws IOException
+     */
+    private AudioFileFormat includeMetadata(AudioFileFormat format) throws IOException {
+        if (decoder != null) {
+            Map<String, Object> props = new HashMap<String, Object>();
+            for (Metadata md : decoder.readMetadata(streamInfo)) {
+                if (md instanceof VorbisComment) {
+                    props.putAll(((VorbisComment) md).toMap());
+                }
+            }
+            format = new AudioFileFormat(FlacFileFormatType.FLAC, format.getFormat(), AudioSystem.NOT_SPECIFIED, props);
+        }
+        return format;
     }
 }
